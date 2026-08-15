@@ -132,7 +132,7 @@ export async function updateProfile(
 ) {
   const user = await prisma.user.update({
     where: { id: userId },
-    data: input.name ? { name: input.name.trim() } : undefined,
+    data: input.name ? { name: input.name.trim() } : {},
   });
 
   let workspace = await prisma.workspace.findFirst({

@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "paychase",
+  "account_id": "0e3c5f2ac43af6e41deff7141d763bbd",
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-03-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -28,9 +29,26 @@
       "bucket_name": "paychase-uploads"
     }
   ],
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "79b94fcffeaa43f09b64b85829d4c6bf"
+    }
+  ],
   "images": {
     "binding": "IMAGES"
   },
+  "vars": {
+    "NEXT_PUBLIC_APP_URL": "https://paychase.phu-mi.com",
+    "CORE_API_URL": "https://core-api.phu-mi.com",
+    "CORE_APP_ID": "paychase"
+  },
+  "routes": [
+    {
+      "pattern": "paychase.phu-mi.com",
+      "custom_domain": true
+    }
+  ],
   "workers_dev": true,
   "preview_urls": true
 }
