@@ -14,7 +14,7 @@ import {
 } from "@/server/domains/invoice/service";
 import { getDashboardMetrics, getReports } from "@/server/domains/analytics/service";
 import { getExtractionProvider, getFollowUpProvider } from "@/server/ai/providers";
-import { storeInvoiceFile, readStoredFile } from "@/server/storage/local";
+import { storeInvoiceFile, readStoredFile } from "@/server/storage";
 import { calculateInvoiceStatus } from "@/server/domains/collection/status";
 import { addDays, toNumber } from "@/lib/utils";
 import type { FollowUpTone } from "@prisma/client";
@@ -757,19 +757,10 @@ app.get("/files/*", async (c) => {
     return c.json({ error: "File not found" }, 404);
   }
   try {
-    const bytes = await readStoredFile(relativePath);
-    const ext = relativePath.split(".").pop()?.toLowerCase();
-    const type =
-      ext === "pdf"
-        ? "application/pdf"
-        : ext === "png"
-          ? "image/png"
-          : ext === "jpg" || ext === "jpeg"
-            ? "image/jpeg"
-            : "application/octet-stream";
+    const { bytes, contentType } = await readStoredFile(relativePath);
     return new Response(bytes, {
       headers: {
-        "Content-Type": type,
+        "Content-Type": contentType,
         "Cache-Control": "private, max-age=3600",
       },
     });
