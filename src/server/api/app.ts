@@ -58,7 +58,7 @@ app.onError((err, c) => {
   const status =
     "status" in err && typeof err.status === "number" ? err.status : 500;
   if (status >= 400 && status < 500) {
-    return c.json({ error: err.message }, status as 400 | 401 | 404 | 409);
+    return c.json({ error: err.message }, status as 400 | 401 | 404 | 409 | 503);
   }
   console.error(err);
   return c.json({ error: "Something went wrong" }, 500);

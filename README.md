@@ -17,6 +17,7 @@ It is **not** accounting software. V1 focuses on:
 - Next.js App Router + TypeScript + Tailwind CSS
 - Hono API (`/api/*`)
 - PostgreSQL + Prisma
+- Phumi Core for shared identity/tenancy sync (server-to-server)
 - TanStack Query + Zod
 - OpenAI for extraction & follow-ups (optional; heuristic fallback when no key)
 - Local object storage in `./uploads`
@@ -30,6 +31,7 @@ pnpm install
 # 2) Env
 cp .env.example .env
 # Optional: set OPENAI_API_KEY for real PDF/image extraction
+# Required for signup: CORE_API_URL, CORE_APP_ID, CORE_REQUEST_SECRET (server-only)
 
 # 3) Start Postgres, push schema, seed demo data
 pnpm db:setup
@@ -56,6 +58,16 @@ Demo login: `demo@paychase.app` / `paychase`
 
 Several thousand dollars outstanding on first load.
 
+## Identity and tenancy (Phumi Core)
+
+PayChase keeps end-user login local (email/password + `pc_session` cookie). On signup, login, and profile updates, the server syncs users and workspaces to [Phumi Core](https://github.com/vathanakkongsothy/phumi-core) over a signed HMAC API:
+
+- PayChase `User.id` → Core user `externalId`
+- PayChase `Workspace.id` → Core tenant `externalId`
+- Invoice and customer records stay in PayChase
+
+If Core is unreachable during **signup** or **workspace creation**, the request fails with a clear error. **Login** retries sync in the background so existing users are not locked out. Core credentials (`CORE_REQUEST_SECRET`) are server-only and must never be exposed via `NEXT_PUBLIC_*` variables.
+
 ## Core flows
 
 - **Auth** `/login` `/signup` — email/password sessions; profile at `/settings`
@@ -70,6 +82,7 @@ Several thousand dollars outstanding on first load.
 ```text
 src/server/
   auth/               # signup, login, sessions, profile
+  core/               # Phumi Core signed client + identity sync
   ai/                 # replaceable AI providers
   domains/
     invoice/
@@ -83,6 +96,7 @@ src/server/
 
 | Command        | Purpose                          |
 |----------------|----------------------------------|
+| `pnpm test`    | Run Core signing contract tests   |
 | `pnpm dev`     | Start Next.js                    |
 | `pnpm db:setup`| Start Postgres, push schema, seed |
 | `pnpm db:up`   | Start Postgres via Docker         |
