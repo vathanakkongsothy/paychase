@@ -30,10 +30,11 @@ pnpm install
 
 # 2) Env
 cp .env.example .env
+# Set DATABASE_URL to the Neon "paychase" connection string (Neon console → Settings → Connection string)
 # Optional: set OPENAI_API_KEY for real PDF/image extraction
 # Required for signup: CORE_API_URL, CORE_APP_ID, CORE_REQUEST_SECRET (server-only)
 
-# 3) Start Postgres, push schema, seed demo data
+# 3) Push schema and seed demo data (Neon Postgres)
 pnpm db:setup
 
 # 4) Run
@@ -43,9 +44,6 @@ pnpm dev
 Open [http://localhost:3002](http://localhost:3002) (or the next free port).
 
 Demo login: `demo@paychase.app` / `paychase`
-
-> Requires Docker Desktop. Postgres runs locally via `docker-compose.yml`
-> (`postgresql://paychase:paychase@localhost:5433/paychase`).
 
 ## Demo seed highlights
 
@@ -92,16 +90,25 @@ src/server/
   api/                # Hono app
 ```
 
+## Deploy (GitHub Actions)
+
+Production deploys run on `ubuntu-latest` via `.github/workflows/deploy.yml` (push to `master` or manual `workflow_dispatch`). This avoids OpenNext symlink issues on Windows.
+
+Configure these GitHub repository secrets before the first deploy:
+
+- **`CLOUDFLARE_API_TOKEN`** — Cloudflare API token with Workers deploy permissions for account `0e3c5f2ac43af6e41deff7141d763bbd`.
+- **`DATABASE_URL`** — Neon pooled connection string for the `paychase` database. Used at build time for Prisma and as `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` (Hyperdrive binding `HYPERDRIVE`). Worker runtime secrets (`DATABASE_URL`, `CORE_REQUEST_SECRET`) are already set on the deployed Worker.
+
 ## Scripts
 
 | Command        | Purpose                          |
 |----------------|----------------------------------|
 | `pnpm test`    | Run Core signing contract tests   |
 | `pnpm dev`     | Start Next.js                    |
-| `pnpm db:setup`| Start Postgres, push schema, seed |
-| `pnpm db:up`   | Start Postgres via Docker         |
+| `pnpm db:setup`| Push schema + seed (Neon Postgres) |
 | `pnpm db:push` | Push Prisma schema only           |
 | `pnpm db:seed` | Reseed demo workspace             |
+| `pnpm deploy`  | OpenNext build + Cloudflare deploy |
 
 ## Product rule
 
