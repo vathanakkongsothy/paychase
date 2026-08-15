@@ -1,11 +1,17 @@
 import { prisma } from "@/server/db/prisma";
 import { hashPassword, verifyPassword } from "@/server/auth/password";
 import { createSession, publicUser } from "@/server/auth/session";
+import { CoreUnavailableError, CoreSyncError } from "@/server/core/errors";
+import {
+  retryIdentitySyncOnLogin,
+  syncIdentityToCore,
+  syncUserProfileToCore,
+} from "@/server/core/sync";
 
 export class AuthError extends Error {
   constructor(
     message: string,
-    public status: 400 | 401 | 409 = 400,
+    public status: 400 | 401 | 409 | 503 = 400,
   ) {
     super(message);
   }
@@ -23,6 +29,9 @@ export async function signup(input: {
     throw new AuthError("An account with that email already exists.", 409);
   }
 
+  const workspaceName =
+    input.workspaceName?.trim() || `${input.name.trim()}'s workspace`;
+
   const user = await prisma.user.create({
     data: {
       name: input.name.trim(),
@@ -30,12 +39,32 @@ export async function signup(input: {
       passwordHash: await hashPassword(input.password),
       workspaces: {
         create: {
-          name: input.workspaceName?.trim() || `${input.name.trim()}'s workspace`,
+          name: workspaceName,
         },
       },
     },
     include: { workspaces: true },
   });
+
+  const workspace = user.workspaces[0];
+  try {
+    await syncIdentityToCore({
+      user: { id: user.id, name: user.name, email: user.email },
+      workspace: { id: workspace.id, name: workspace.name },
+    });
+  } catch (error) {
+    await prisma.user.delete({ where: { id: user.id } });
+    if (error instanceof CoreUnavailableError) {
+      throw new AuthError(
+        "Account creation failed because Phumi Core is unreachable. Try again shortly.",
+        503,
+      );
+    }
+    if (error instanceof CoreSyncError) {
+      throw new AuthError(error.message, 503);
+    }
+    throw error;
+  }
 
   const session = await createSession(user.id);
   return {
@@ -62,6 +91,30 @@ export async function login(input: { email: string; password: string }) {
         name: `${user.name}'s workspace`,
         ownerId: user.id,
       },
+    });
+
+    try {
+      await syncIdentityToCore({
+        user: { id: user.id, name: user.name, email: user.email },
+        workspace: { id: workspace.id, name: workspace.name },
+      });
+    } catch (error) {
+      await prisma.workspace.delete({ where: { id: workspace.id } });
+      if (error instanceof CoreUnavailableError) {
+        throw new AuthError(
+          "Could not create your workspace because Phumi Core is unreachable. Try again shortly.",
+          503,
+        );
+      }
+      if (error instanceof CoreSyncError) {
+        throw new AuthError(error.message, 503);
+      }
+      throw error;
+    }
+  } else {
+    await retryIdentitySyncOnLogin({
+      user: { id: user.id, name: user.name, email: user.email },
+      workspace: { id: workspace.id, name: workspace.name },
     });
   }
 
@@ -93,6 +146,11 @@ export async function updateProfile(
       data: { name: input.workspaceName.trim() },
     });
   }
+
+  await syncUserProfileToCore({
+    user: { id: user.id, name: user.name, email: user.email },
+    workspace,
+  });
 
   return { user: publicUser(user), workspace };
 }
