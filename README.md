@@ -20,7 +20,7 @@ It is **not** accounting software. V1 focuses on:
 - Phumi Core for shared identity/tenancy sync (server-to-server)
 - TanStack Query + Zod
 - OpenAI for extraction & follow-ups (optional; heuristic fallback when no key)
-- Local object storage in `./uploads`
+- Invoice file storage: Cloudflare R2 in production; local `./uploads` for `pnpm dev` only
 
 ## Quick start
 
@@ -88,7 +88,7 @@ src/server/
     invoice/
     collection/       # status + priority (deterministic)
     analytics/
-  storage/            # local files (S3-ready interface later)
+  storage/            # R2 in production, ./uploads in local dev
   api/                # Hono app
 ```
 
