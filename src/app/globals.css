@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f7f4ef;
+  --foreground: #1c1917;
+  --panel: #ffffff;
+  --ink: #1c1917;
+  --muted: #78716c;
+  --teal: #0f5c56;
+  --overdue: #b91c1c;
+  --recovered: #047857;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(15, 92, 86, 0.08), transparent 28%),
+    radial-gradient(circle at top right, rgba(185, 28, 28, 0.05), transparent 24%),
+    linear-gradient(180deg, #f8f5f0 0%, #f3efe8 100%);
+  color: var(--foreground);
+  font-family: var(--font-body), Georgia, serif;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+.money {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+}
+
+.grid-fade {
+  background-image:
+    linear-gradient(rgba(28, 25, 23, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(28, 25, 23, 0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.page-title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.75rem;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+@media (min-width: 640px) {
+  .page-title {
+    font-size: 2.25rem;
+  }
+}

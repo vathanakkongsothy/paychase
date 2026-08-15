@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: paychase
+      POSTGRES_PASSWORD: paychase
+      POSTGRES_DB: paychase
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U paychase -d paychase"]
+      interval: 2s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - paychase_pg:/var/lib/postgresql/data
+
+volumes:
+  paychase_pg:

@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  DUE_SOON
+  DUE_TODAY
+  OVERDUE
+  PROMISED
+  DISPUTED
+  PAID
+  WRITTEN_OFF
+}
+
+enum FollowUpType {
+  REMINDER
+  NOTE
+  PROMISE
+  STATUS_CHANGE
+}
+
+enum FollowUpTone {
+  FRIENDLY
+  PROFESSIONAL
+  FIRM
+}
+
+enum FollowUpStatus {
+  DRAFT
+  SENT
+  CANCELLED
+}
+
+enum PromiseStatus {
+  ACTIVE
+  KEPT
+  MISSED
+  CANCELLED
+}
+
+enum InvoiceEventType {
+  INVOICE_UPLOADED
+  INVOICE_EXTRACTED
+  INVOICE_CORRECTED
+  INVOICE_SAVED
+  REMINDER_GENERATED
+  REMINDER_SENT
+  NOTE_ADDED
+  PROMISE_RECORDED
+  PROMISE_MISSED
+  FOLLOW_UP_SCHEDULED
+  MARKED_DISPUTED
+  MARKED_PAID
+  MARKED_WRITTEN_OFF
+  STATUS_CHANGED
+}
+
+enum PaymentBehavior {
+  USUALLY_ON_TIME
+  SOMETIMES_LATE
+  FREQUENTLY_LATE
+  UNKNOWN
+}
+
+model User {
+  id           String      @id @default(cuid())
+  email        String      @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now()) @updatedAt
+  workspaces   Workspace[]
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Workspace {
+  id        String     @id @default(cuid())
+  name      String
+  ownerId   String
+  owner     User       @relation(fields: [ownerId], references: [id])
+  createdAt DateTime   @default(now())
+  customers Customer[]
+  invoices  Invoice[]
+}
+
+model Customer {
+  id            String          @id @default(cuid())
+  workspaceId   String
+  workspace     Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  name          String
+  companyName   String?
+  email         String?
+  phone         String?
+  notes         String?
+  paymentBehavior PaymentBehavior @default(UNKNOWN)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  invoices      Invoice[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, name])
+}
+
+model Invoice {
+  id                 String              @id @default(cuid())
+  workspaceId        String
+  workspace          Workspace           @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  customerId         String?
+  customer           Customer?           @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  invoiceNumber      String
+  issueDate          DateTime?
+  dueDate            DateTime?
+  currency           String              @default("USD")
+  subtotal           Decimal?            @db.Decimal(12, 2)
+  tax                Decimal?            @db.Decimal(12, 2)
+  totalAmount        Decimal             @db.Decimal(12, 2)
+  amountOutstanding  Decimal             @db.Decimal(12, 2) 
+  status             InvoiceStatus       @default(DRAFT)
+  daysOverdue        Int                 @default(0)
+  priorityScore      Int                 @default(0)
+  purchaseOrderRef   String?
+  sourceFileUrl      String?
+  sourceFileName     String?
+  sourceMimeType     String?
+  notes              String?
+  lastFollowUpAt     DateTime?
+  nextFollowUpAt     DateTime?
+  paidAt             DateTime?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  extractions        InvoiceExtraction[]
+  followUps          FollowUp[]
+  promises           PaymentPromise[]
+  events             InvoiceEvent[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, priorityScore])
+  @@index([customerId])
+  @@index([dueDate])
+}
+
+model InvoiceExtraction {
+  id             String   @id @default(cuid())
+  invoiceId      String
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  extractedData  Json
+  confidenceData Json
+  model          String
+  createdAt      DateTime @default(now())
+
+  @@index([invoiceId])
+}
+
+model FollowUp {
+  id        String         @id @default(cuid())
+  invoiceId String
+  invoice   Invoice        @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  type      FollowUpType
+  tone      FollowUpTone?
+  subject   String?
+  message   String
+  status    FollowUpStatus @default(DRAFT)
+  sentAt    DateTime?
+  createdAt DateTime       @default(now())
+
+  @@index([invoiceId])
+}
+
+model PaymentPromise {
+  id             String        @id @default(cuid())
+  invoiceId      String
+  invoice        Invoice       @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  promisedDate   DateTime
+  promisedAmount Decimal       @db.Decimal(12, 2) 
+  status         PromiseStatus @default(ACTIVE)
+  notes          String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([invoiceId])
+  @@index([promisedDate, status])
+}
+
+model InvoiceEvent {
+  id        String           @id @default(cuid())
+  invoiceId String
+  invoice   Invoice          @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  type      InvoiceEventType
+  metadata  Json?
+  createdAt DateTime         @default(now())
+
+  @@index([invoiceId, createdAt])
+}
