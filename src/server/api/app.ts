@@ -758,7 +758,7 @@ app.get("/files/*", async (c) => {
   }
   try {
     const { bytes, contentType } = await readStoredFile(relativePath);
-    return new Response(bytes, {
+    return new Response(Uint8Array.from(bytes), {
       headers: {
         "Content-Type": contentType,
         "Cache-Control": "private, max-age=3600",
