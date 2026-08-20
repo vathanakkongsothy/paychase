@@ -3,7 +3,8 @@ import { HTTPException } from "hono/http-exception";
 import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { prisma } from "@/server/db/prisma";
+import { Prisma } from "@prisma/client";
+import { prisma, runWithPrisma } from "@/server/db/prisma";
 import {
   getInvoiceInWorkspace,
   getWorkspaceForUser,
@@ -61,8 +62,21 @@ app.onError((err, c) => {
     return c.json({ error: err.message }, status as 400 | 401 | 404 | 409 | 503);
   }
   console.error(err);
+  if (
+    err instanceof Prisma.PrismaClientInitializationError ||
+    err instanceof Prisma.PrismaClientKnownRequestError ||
+    err instanceof Prisma.PrismaClientRustPanicError ||
+    err instanceof Prisma.PrismaClientUnknownRequestError
+  ) {
+    return c.json(
+      { error: "Could not reach the database. Try again shortly." },
+      503,
+    );
+  }
   return c.json({ error: "Something went wrong" }, 500);
 });
+
+app.use("*", (_c, next) => runWithPrisma(() => next()));
 
 app.use("*", async (c, next) => {
   const path = apiPath(c.req.path);
@@ -107,7 +121,15 @@ function isPaidStatus(raw: string | null | undefined) {
   return /^(paid|settled|received|complete[d]?)$/.test(normalized);
 }
 
-app.get("/health", (c) => c.json({ ok: true, product: "PayChase" }));
+app.get("/health", async (c) => {
+  try {
+    await prisma.$queryRawUnsafe("SELECT 1");
+    return c.json({ ok: true, product: "PayChase", database: "ok" });
+  } catch (error) {
+    console.error("Health database check failed", error);
+    return c.json({ ok: false, product: "PayChase", database: "error" }, 503);
+  }
+});
 
 app.post(
   "/auth/signup",

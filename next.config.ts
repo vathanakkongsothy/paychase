@@ -1,7 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: [
+    "@prisma/client",
+    ".prisma/client",
+    "@prisma/adapter-pg",
+    "pg",
+    "pg-cloudflare",
+  ],
+  outputFileTracingIncludes: {
+    "/*": [
+      "./node_modules/pg-cloudflare/dist/**",
+      "./node_modules/pg-cloudflare/esm/**",
+    ],
+  },
 };
 
 export default nextConfig;

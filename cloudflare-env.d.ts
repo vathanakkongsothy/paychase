@@ -4,10 +4,16 @@
 interface __BaseEnv_CloudflareEnv {
 	UPLOADS: R2Bucket;
 	DB: D1Database;
+	HYPERDRIVE: Hyperdrive;
 	IMAGES: ImagesBinding;
 	ASSETS: Fetcher;
 	NEXTJS_ENV: string;
 	OPENAI_API_KEY: string;
+	CORE_API_URL: string;
+	CORE_APP_ID: string;
+	CORE_REQUEST_SECRET: string;
+	DATABASE_URL: string;
+	NEXT_PUBLIC_APP_URL: string;
 	WORKER_SELF_REFERENCE: Fetcher /* paychase */;
 }
 declare namespace Cloudflare {
