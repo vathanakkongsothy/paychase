@@ -23,9 +23,38 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
-      - name: Build and deploy
-        run: pnpm deploy
+      - name: Configure Wrangler credentials
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          WRANGLER_AUTH_TOML: ${{ secrets.WRANGLER_AUTH_TOML }}
+        run: |
+          set -euo pipefail
+          if [ -n "${CLOUDFLARE_API_TOKEN:-}" ]; then
+            http_code=$(curl -sS -o /tmp/cf-token-verify.json -w "%{http_code}" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              https://api.cloudflare.com/client/v4/user/tokens/verify || true)
+            if [ "$http_code" = "200" ]; then
+              echo "Using CLOUDFLARE_API_TOKEN"
+              echo "CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}" >> "$GITHUB_ENV"
+              exit 0
+            fi
+            echo "CLOUDFLARE_API_TOKEN is invalid (HTTP $http_code); falling back to Wrangler OAuth credentials."
+          fi
+          if [ -z "${WRANGLER_AUTH_TOML:-}" ]; then
+            echo "No valid Cloudflare credentials. Set a Workers API token as CLOUDFLARE_API_TOKEN, or WRANGLER_AUTH_TOML." >&2
+            exit 1
+          fi
+          mkdir -p "$HOME/.config/.wrangler/config" "$HOME/.wrangler/config"
+          printf '%s\n' "$WRANGLER_AUTH_TOML" > "$HOME/.config/.wrangler/config/default.toml"
+          cp "$HOME/.config/.wrangler/config/default.toml" "$HOME/.wrangler/config/default.toml"
+          chmod 600 "$HOME/.config/.wrangler/config/default.toml" "$HOME/.wrangler/config/default.toml"
+          echo "Using Wrangler OAuth credentials"
+
+      - name: Verify Cloudflare auth
+        run: npx wrangler whoami
+
+      - name: Build and deploy
+        run: pnpm run deploy
+        env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: ${{ secrets.DATABASE_URL }}
