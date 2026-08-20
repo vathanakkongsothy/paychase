@@ -21,6 +21,7 @@ It is **not** accounting software. V1 focuses on:
 - TanStack Query + Zod
 - OpenAI for extraction & follow-ups (optional; heuristic fallback when no key)
 - Invoice file storage: Cloudflare R2 in production; local `./uploads` for `pnpm dev` only
+- Cloudflare Hyperdrive for Neon Postgres in production (Prisma driver adapter)
 
 ## Quick start
 
@@ -97,7 +98,7 @@ Production deploys run on `ubuntu-latest` via `.github/workflows/deploy.yml` (pu
 Configure these GitHub repository secrets before the first deploy:
 
 - **`CLOUDFLARE_API_TOKEN`** — Cloudflare API token with Workers deploy permissions for account `0e3c5f2ac43af6e41deff7141d763bbd`.
-- **`DATABASE_URL`** — Neon pooled connection string for the `paychase` database. Used at build time for Prisma and as `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` (Hyperdrive binding `HYPERDRIVE`). Worker runtime secrets (`DATABASE_URL`, `CORE_REQUEST_SECRET`) are already set on the deployed Worker.
+- **`DATABASE_URL`** — Neon pooled connection string for the `paychase` database. Used at build time for Prisma and as `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` (Hyperdrive binding `HYPERDRIVE`). Worker runtime secrets (`CORE_REQUEST_SECRET`) are already set on the deployed Worker. Signup/login query Postgres through Hyperdrive, not a raw `DATABASE_URL` TCP connection (Workers cannot open one).
 
 ## Scripts
 
