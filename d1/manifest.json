@@ -1,0 +1,556 @@
+{
+  "source": "paychase",
+  "target": "paychase-neon-d1",
+  "representations": {
+    "dates": "UTC ISO 8601 with +00:00 suffix",
+    "decimal": "integer multiplied by 10^scale",
+    "arrays": "JSON text"
+  },
+  "tables": [
+    {
+      "name": "PilotCampaign",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "slug",
+          "sourceType": "text"
+        },
+        {
+          "name": "name",
+          "sourceType": "text"
+        },
+        {
+          "name": "channel",
+          "sourceType": "text"
+        },
+        {
+          "name": "budgetCents",
+          "sourceType": "int4"
+        },
+        {
+          "name": "spendCents",
+          "sourceType": "int4"
+        },
+        {
+          "name": "startsAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "endsAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "updatedAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "revenueCents",
+          "sourceType": "int4"
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "email",
+          "sourceType": "text"
+        },
+        {
+          "name": "name",
+          "sourceType": "text"
+        },
+        {
+          "name": "passwordHash",
+          "sourceType": "text"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "updatedAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "PilotLead",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "campaignId",
+          "sourceType": "text"
+        },
+        {
+          "name": "fullName",
+          "sourceType": "text"
+        },
+        {
+          "name": "businessName",
+          "sourceType": "text"
+        },
+        {
+          "name": "email",
+          "sourceType": "text"
+        },
+        {
+          "name": "contactMethod",
+          "sourceType": "text"
+        },
+        {
+          "name": "contactValue",
+          "sourceType": "text"
+        },
+        {
+          "name": "businessType",
+          "sourceType": "text"
+        },
+        {
+          "name": "monthlyInvoices",
+          "sourceType": "text"
+        },
+        {
+          "name": "overdueAmount",
+          "sourceType": "text"
+        },
+        {
+          "name": "followUpMethod",
+          "sourceType": "text"
+        },
+        {
+          "name": "willingnessToPay",
+          "sourceType": "text"
+        },
+        {
+          "name": "preferredLanguage",
+          "sourceType": "text"
+        },
+        {
+          "name": "notes",
+          "sourceType": "text"
+        },
+        {
+          "name": "qualificationScore",
+          "sourceType": "int4"
+        },
+        {
+          "name": "stage",
+          "sourceType": "PilotLeadStage"
+        },
+        {
+          "name": "stageUpdatedAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "consentVersion",
+          "sourceType": "text"
+        },
+        {
+          "name": "utmSource",
+          "sourceType": "text"
+        },
+        {
+          "name": "utmMedium",
+          "sourceType": "text"
+        },
+        {
+          "name": "utmCampaign",
+          "sourceType": "text"
+        },
+        {
+          "name": "utmContent",
+          "sourceType": "text"
+        },
+        {
+          "name": "utmTerm",
+          "sourceType": "text"
+        },
+        {
+          "name": "landingPath",
+          "sourceType": "text"
+        },
+        {
+          "name": "referrer",
+          "sourceType": "text"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "updatedAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "Session",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "userId",
+          "sourceType": "text"
+        },
+        {
+          "name": "token",
+          "sourceType": "text"
+        },
+        {
+          "name": "expiresAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "Workspace",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "name",
+          "sourceType": "text"
+        },
+        {
+          "name": "ownerId",
+          "sourceType": "text"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "workspaceId",
+          "sourceType": "text"
+        },
+        {
+          "name": "name",
+          "sourceType": "text"
+        },
+        {
+          "name": "companyName",
+          "sourceType": "text"
+        },
+        {
+          "name": "email",
+          "sourceType": "text"
+        },
+        {
+          "name": "phone",
+          "sourceType": "text"
+        },
+        {
+          "name": "notes",
+          "sourceType": "text"
+        },
+        {
+          "name": "paymentBehavior",
+          "sourceType": "PaymentBehavior"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "updatedAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "PilotLeadEvent",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "leadId",
+          "sourceType": "text"
+        },
+        {
+          "name": "type",
+          "sourceType": "PilotLeadEventType"
+        },
+        {
+          "name": "metadata",
+          "sourceType": "jsonb"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "Invoice",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "workspaceId",
+          "sourceType": "text"
+        },
+        {
+          "name": "customerId",
+          "sourceType": "text"
+        },
+        {
+          "name": "invoiceNumber",
+          "sourceType": "text"
+        },
+        {
+          "name": "issueDate",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "dueDate",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "currency",
+          "sourceType": "text"
+        },
+        {
+          "name": "subtotal",
+          "sourceType": "numeric",
+          "scale": 2
+        },
+        {
+          "name": "tax",
+          "sourceType": "numeric",
+          "scale": 2
+        },
+        {
+          "name": "totalAmount",
+          "sourceType": "numeric",
+          "scale": 2
+        },
+        {
+          "name": "amountOutstanding",
+          "sourceType": "numeric",
+          "scale": 2
+        },
+        {
+          "name": "status",
+          "sourceType": "InvoiceStatus"
+        },
+        {
+          "name": "daysOverdue",
+          "sourceType": "int4"
+        },
+        {
+          "name": "priorityScore",
+          "sourceType": "int4"
+        },
+        {
+          "name": "purchaseOrderRef",
+          "sourceType": "text"
+        },
+        {
+          "name": "sourceFileUrl",
+          "sourceType": "text"
+        },
+        {
+          "name": "sourceFileName",
+          "sourceType": "text"
+        },
+        {
+          "name": "sourceMimeType",
+          "sourceType": "text"
+        },
+        {
+          "name": "notes",
+          "sourceType": "text"
+        },
+        {
+          "name": "lastFollowUpAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "nextFollowUpAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "paidAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "updatedAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "FollowUp",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "invoiceId",
+          "sourceType": "text"
+        },
+        {
+          "name": "type",
+          "sourceType": "FollowUpType"
+        },
+        {
+          "name": "tone",
+          "sourceType": "FollowUpTone"
+        },
+        {
+          "name": "subject",
+          "sourceType": "text"
+        },
+        {
+          "name": "message",
+          "sourceType": "text"
+        },
+        {
+          "name": "status",
+          "sourceType": "FollowUpStatus"
+        },
+        {
+          "name": "sentAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "InvoiceEvent",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "invoiceId",
+          "sourceType": "text"
+        },
+        {
+          "name": "type",
+          "sourceType": "InvoiceEventType"
+        },
+        {
+          "name": "metadata",
+          "sourceType": "jsonb"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "InvoiceExtraction",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "invoiceId",
+          "sourceType": "text"
+        },
+        {
+          "name": "extractedData",
+          "sourceType": "jsonb"
+        },
+        {
+          "name": "confidenceData",
+          "sourceType": "jsonb"
+        },
+        {
+          "name": "model",
+          "sourceType": "text"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    },
+    {
+      "name": "PaymentPromise",
+      "columns": [
+        {
+          "name": "id",
+          "sourceType": "text"
+        },
+        {
+          "name": "invoiceId",
+          "sourceType": "text"
+        },
+        {
+          "name": "promisedDate",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "promisedAmount",
+          "sourceType": "numeric",
+          "scale": 2
+        },
+        {
+          "name": "status",
+          "sourceType": "PromiseStatus"
+        },
+        {
+          "name": "notes",
+          "sourceType": "text"
+        },
+        {
+          "name": "createdAt",
+          "sourceType": "timestamp"
+        },
+        {
+          "name": "updatedAt",
+          "sourceType": "timestamp"
+        }
+      ]
+    }
+  ]
+}

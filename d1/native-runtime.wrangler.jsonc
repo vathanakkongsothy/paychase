@@ -1,0 +1,16 @@
+{
+  "name": "paychase-d1-native-runtime",
+  "main": "native-runtime-worker.ts",
+  "compatibility_date": "2025-03-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [],
+  "vars": { "DATABASE_BACKEND": "d1" },
+  "d1_databases": [{
+    "binding": "D1_DB",
+    "database_name": "paychase-d1-native-runtime",
+    "database_id": "00000000-0000-0000-0000-000000000000",
+    "migrations_dir": "migrations"
+  }]
+}
