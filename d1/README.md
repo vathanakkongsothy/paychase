@@ -1,45 +1,42 @@
-# PayChase: Neon to D1 migration
+# PayChase: Neon to D1
 
-Status: **draft migration preparation; the live application still uses PostgreSQL.**
+The complete D1 application runtime is in src/server/d1. The real Next API route selects it only when the Worker variable DATABASE_BACKEND is exactly d1. An absent flag or neon keeps the existing Neon implementation. Invalid flags fail closed.
 
-This adds a separate D1 schema and database tooling. It does not change the live Worker configuration, PostgreSQL client, or production deployment command. The preflight Worker only checks schema access; it does not serve the application.
+## Runtime behavior
 
-## Included
+D1 uses its native prepared statements. All multi-row changes use an atomic DB.batch: signup and compensation, password/session changes, upload/customer/extraction/events, invoice corrections, reminders and notes, promises, and payment status. Payment and reminder replay produces one transition event. Every child mutation is scoped to its parent invoice and workspace. A monotonic invoice revision prevents stale derived fields or corrections from undoing newer writes.
 
-- A schema-only baseline from the verified Neon snapshot, preserving foreign keys, unique indexes, enum checks, and translated business constraints. No source rows, credentials, or snapshots are committed.
-- A generated SQLite Prisma schema in `d1/schema.prisma`, separate from the current application schema. Additional SQL migrations reconcile new application tables/columns when needed.
-- Exact decimal/quantity conversion, JSON array validation, local migration checks, and an isolated read-only preflight Worker.
-- Explicit D1 target `paychase-neon-d1` in `d1/wrangler.jsonc`. Existing production bindings remain unchanged.
+The five money fields are integer cents. Input accepts finite numbers or decimal strings, rejects fractional cents and values outside NUMERIC(12,2), and stores exact integers. Reports sum integer cents before converting at the JSON boundary. Timestamps use UTC ISO strings ending +00:00. Imported JSON is decoded at read boundaries. Prisma's separate generated D1 client supplies types only; no Prisma transaction adapter runs on D1.
 
 ## Local validation (Node 22.13+)
 
-Run from the repository root:
+Install using pnpm install. Then run:
 
-```sh
-npm run db:d1:sync-schema
-npm run db:d1:generate
-npm run db:d1:validate
-npm run db:d1:migrate:local
-npm run db:d1:build
-npm run db:d1:typecheck
-npm run db:d1:smoke
-npm run db:d1:preview
-```
+    pnpm db:d1:generate
+    pnpm db:d1:validate
+    pnpm test:d1
+    pnpm db:d1:app:smoke:native
+    pnpm exec tsc --noEmit
+    pnpm db:d1:app:migrate:local
+    pnpm build:d1
+    pnpm preview:d1
 
-Use the repository's package manager to install dependencies first. These commands do not require Neon credentials and operate locally. A health request to the preview must return `schema: ok`; it will still report `applicationReady: false` because application integration is not part of this preparation.
+The native smoke runs the same D1 application router in a local Worker with a private synthetic database and no Core calls. It validates password login, sessions, invoices, promises, payment replay and reporting. The full OpenNext build and application smoke remain required before deployment.
 
-## Representation contract
+The candidate Worker configuration wrangler.d1.jsonc serves the real application with DATABASE_BACKEND=d1 and D1_DB. It has no production routes. The preflight under d1/wrangler.jsonc remains a schema-only diagnostic; its applicationReady:false response is intentionally not an application acceptance test.
 
-PostgreSQL decimals become integer minor units with the original scale, using Prisma `BigInt` so values are not restricted to 32-bit integers. Use the helpers in `d1/values.mjs` at input/output boundaries, and preserve the units in comparisons and aggregates. Reject values outside JavaScript's safe integer range before binding them to D1. Timestamps use UTC ISO strings ending `+00:00`; JSON null remains distinct from SQL NULL. Scalar arrays become JSON and require replacement queries. Model/table mappings are retained.
+CI applies the migrations to SQLite, exercises actual authenticated API routes and failure rollback, checks both generated schemas, types, local Wrangler migration and preflight, then builds the full OpenNext application, dry-runs its candidate Worker, and checks authenticated reads, exact cents, corrections, promises, payment replay, and reporting through that local Worker. The smoke creates uniquely named local records and removes them afterward. No remote migration or deployment runs from this validation workflow. The master deployment calls it as a reusable workflow and waits for success before configuring Cloudflare credentials or deploying. Both jobs check out the triggering commit SHA. PR validation does not trigger a production deployment.
 
-## Remaining application work before cutover
+The existing Neon implementation and its dependencies remain available during rollout. Remove that fallback only after the D1 cutover and reconciliation period.
 
-Review nested writes and multi-step application mutations for atomic D1 batches.
+## Controlled production cutover
 
-The transaction list comes from the local source audit at migration preparation time; the PR base can differ. Also replace PostgreSQL-only search options, duplicate skipping, array predicates, and raw SQL. Adapt the database client and all numeric boundaries to the new schema. Do not point the current PostgreSQL client at the D1 database.
+Merging or deploying this PR leaves DATABASE_BACKEND unset, so traffic continues to Neon. The D1_DB binding initially identifies paychase-neon-d1, a static migration snapshot. **Do not enable the flag against that stale snapshot.**
 
-## Production cutover
+1. Confirm the deployed application source matches the reviewed PR source. The baseline preserves three pilot tables that are absent from the current master application schema. Reconcile any deployed or uncommitted pilot features before cutover; this PR does not replace those user edits. Rehearse against a fresh, empty D1 database. Apply all SQL in d1/migrations, including the runtime revision migration.
+2. Pause application writes and drain jobs/webhooks. Export a fresh Neon snapshot, transform/import data only, and verify all source rows, scaled values, timestamps, foreign keys and integrity. Never apply the baseline to a populated database without migration history.
+3. Run the read-only d1/cutover-readiness.sql against the new database and check its integrity, row counts, representations, runtime revision and tenant/payment invariants. Then run node d1/prepare-cutover.mjs VERIFIED_FRESH_D1_UUID DATABASE_NAME to update D1_DB and DATABASE_BACKEND in both Worker configurations. Review and commit those changes so future master deployments keep D1 selected. Validate login, upload, corrections, reporting, promises, and repeated mark-paid requests against the candidate.
+4. Explicitly set DATABASE_BACKEND=d1 on the production Worker and deploy the reviewed build. Verify /api/health reports backend:d1 and run the acceptance checks before resuming writes.
+5. Retain Neon. Before any D1 writes, rollback is DATABASE_BACKEND=neon; after D1 accepts writes, pause and reconcile them into Neon before rollback.
 
-The existing D1 target holds a static snapshot and has no Wrangler migration history. **Do not run the baseline against that populated database.** Use a fresh empty D1 database for a rehearsed cutover, apply these migrations, transform/import a fresh data-only Neon snapshot, and verify row contents plus foreign keys. Keep writes paused during the final export/import and drain payment jobs/webhooks before changing bindings. Test concurrent writes, rollback, tenant isolation, login and product workflows first.
-
-Preserve Neon for rollback; after D1 accepts new writes, rollback also requires data reconciliation. This draft does not authorize an automatic deployment, remote migration, or source deletion.
+Only schema and code are committed. Customer snapshots, credentials, and imports remain private.

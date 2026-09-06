@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "paychase",
+  "name": "paychase-d1-candidate",
   "account_id": "0e3c5f2ac43af6e41deff7141d763bbd",
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-03-01",
@@ -19,16 +19,10 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "paychase"
+      "service": "paychase-d1-candidate"
     }
   ],
   "d1_databases": [
-    {
-      "binding": "DB",
-      "database_name": "paychase",
-      "database_id": "d48f6b9a-0d1c-4609-a99a-d069e519c49b",
-      "migrations_dir": "migrations/d1"
-    },
     {
       "binding": "D1_DB",
       "database_name": "paychase-neon-d1",
@@ -42,26 +36,16 @@
       "bucket_name": "paychase-uploads"
     }
   ],
-  "hyperdrive": [
-    {
-      "binding": "HYPERDRIVE",
-      "id": "79b94fcffeaa43f09b64b85829d4c6bf"
-    }
-  ],
   "images": {
     "binding": "IMAGES"
   },
   "vars": {
     "NEXT_PUBLIC_APP_URL": "https://paychase.phu-mi.com",
     "CORE_API_URL": "https://core-api.phu-mi.com",
-    "CORE_APP_ID": "paychase"
+    "CORE_APP_ID": "paychase",
+    "DATABASE_BACKEND": "d1"
   },
-  "routes": [
-    {
-      "pattern": "paychase.phu-mi.com",
-      "custom_domain": true
-    }
-  ],
-  "workers_dev": true,
-  "preview_urls": true
+  "routes": [],
+  "workers_dev": false,
+  "preview_urls": false
 }

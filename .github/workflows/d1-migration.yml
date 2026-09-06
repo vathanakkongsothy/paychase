@@ -1,14 +1,22 @@
-name: D1 migration validation
+name: D1 application validation
 
 on:
   pull_request:
     paths:
       - "d1/**"
+      - "src/**"
       - "prisma/schema.prisma"
       - "package.json"
       - "pnpm-lock.yaml"
+      - "tsconfig.json"
+      - "wrangler*.jsonc"
       - ".github/workflows/d1-migration.yml"
+      - ".github/workflows/deploy.yml"
+      - "next.config.ts"
+      - "open-next.config.ts"
+      - "vitest.config.ts"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -16,9 +24,16 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: postgresql://validation:validation@localhost:5432/validation
+      CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: postgresql://validation:validation@localhost:5432/validation
+      WRANGLER_SEND_METRICS: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
       - uses: pnpm/action-setup@v4
         with:
           version: 11.7.0
@@ -30,8 +45,17 @@ jobs:
       - run: npm run db:d1:sync-schema
       - run: git diff --exit-code -- d1/schema.prisma d1/contract.json
       - run: npm run db:d1:generate
+      - run: pnpm exec prisma generate
       - run: npm run db:d1:validate
+      - run: pnpm test
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm exec eslint src/server/d1
       - run: npm run db:d1:migrate:local
       - run: npm run db:d1:build
       - run: npm run db:d1:typecheck
       - run: npm run db:d1:smoke
+      - run: npm run db:d1:app:smoke:native
+      - run: npm run build:d1
+      - run: pnpm exec wrangler deploy --config wrangler.d1.jsonc --dry-run --outdir .d1-build/application
+      - run: npm run db:d1:app:migrate:local
+      - run: npm run db:d1:app:smoke
