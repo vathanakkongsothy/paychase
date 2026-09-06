@@ -25,8 +25,8 @@
   "d1_databases": [
     {
       "binding": "D1_DB",
-      "database_name": "paychase-neon-d1",
-      "database_id": "6162208e-67d5-499e-8314-e90097e79d4c",
+      "database_name": "paychase-neon-d1-live-20260906",
+      "database_id": "5e84c410-f21f-4660-9d01-a1d8c35a2bb2",
       "migrations_dir": "d1/migrations"
     }
   ],

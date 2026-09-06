@@ -31,8 +31,8 @@
     },
     {
       "binding": "D1_DB",
-      "database_name": "paychase-neon-d1",
-      "database_id": "6162208e-67d5-499e-8314-e90097e79d4c",
+      "database_name": "paychase-neon-d1-live-20260906",
+      "database_id": "5e84c410-f21f-4660-9d01-a1d8c35a2bb2",
       "migrations_dir": "d1/migrations"
     }
   ],
@@ -42,19 +42,14 @@
       "bucket_name": "paychase-uploads"
     }
   ],
-  "hyperdrive": [
-    {
-      "binding": "HYPERDRIVE",
-      "id": "79b94fcffeaa43f09b64b85829d4c6bf"
-    }
-  ],
   "images": {
     "binding": "IMAGES"
   },
   "vars": {
     "NEXT_PUBLIC_APP_URL": "https://paychase.phu-mi.com",
     "CORE_API_URL": "https://core-api.phu-mi.com",
-    "CORE_APP_ID": "paychase"
+    "CORE_APP_ID": "paychase",
+    "DATABASE_BACKEND": "d1"
   },
   "routes": [
     {
