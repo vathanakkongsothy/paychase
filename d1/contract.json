@@ -1,0 +1,384 @@
+{
+  "tables": [
+    {
+      "name": "User",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "email",
+          "type": "String"
+        },
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "passwordHash",
+          "type": "String"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "Session",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "userId",
+          "type": "String"
+        },
+        {
+          "name": "token",
+          "type": "String"
+        },
+        {
+          "name": "expiresAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "Workspace",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "ownerId",
+          "type": "String"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "workspaceId",
+          "type": "String"
+        },
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "companyName",
+          "type": "String"
+        },
+        {
+          "name": "email",
+          "type": "String"
+        },
+        {
+          "name": "phone",
+          "type": "String"
+        },
+        {
+          "name": "notes",
+          "type": "String"
+        },
+        {
+          "name": "paymentBehavior",
+          "type": "PaymentBehavior"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "Invoice",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "workspaceId",
+          "type": "String"
+        },
+        {
+          "name": "customerId",
+          "type": "String"
+        },
+        {
+          "name": "invoiceNumber",
+          "type": "String"
+        },
+        {
+          "name": "issueDate",
+          "type": "DateTime"
+        },
+        {
+          "name": "dueDate",
+          "type": "DateTime"
+        },
+        {
+          "name": "currency",
+          "type": "String"
+        },
+        {
+          "name": "subtotal",
+          "type": "BigInt"
+        },
+        {
+          "name": "tax",
+          "type": "BigInt"
+        },
+        {
+          "name": "totalAmount",
+          "type": "BigInt"
+        },
+        {
+          "name": "amountOutstanding",
+          "type": "BigInt"
+        },
+        {
+          "name": "status",
+          "type": "InvoiceStatus"
+        },
+        {
+          "name": "daysOverdue",
+          "type": "Int"
+        },
+        {
+          "name": "priorityScore",
+          "type": "Int"
+        },
+        {
+          "name": "purchaseOrderRef",
+          "type": "String"
+        },
+        {
+          "name": "sourceFileUrl",
+          "type": "String"
+        },
+        {
+          "name": "sourceFileName",
+          "type": "String"
+        },
+        {
+          "name": "sourceMimeType",
+          "type": "String"
+        },
+        {
+          "name": "notes",
+          "type": "String"
+        },
+        {
+          "name": "lastFollowUpAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "nextFollowUpAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "paidAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "InvoiceExtraction",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "invoiceId",
+          "type": "String"
+        },
+        {
+          "name": "extractedData",
+          "type": "Json"
+        },
+        {
+          "name": "confidenceData",
+          "type": "Json"
+        },
+        {
+          "name": "model",
+          "type": "String"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "FollowUp",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "invoiceId",
+          "type": "String"
+        },
+        {
+          "name": "type",
+          "type": "FollowUpType"
+        },
+        {
+          "name": "tone",
+          "type": "FollowUpTone"
+        },
+        {
+          "name": "subject",
+          "type": "String"
+        },
+        {
+          "name": "message",
+          "type": "String"
+        },
+        {
+          "name": "status",
+          "type": "FollowUpStatus"
+        },
+        {
+          "name": "sentAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "PaymentPromise",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "invoiceId",
+          "type": "String"
+        },
+        {
+          "name": "promisedDate",
+          "type": "DateTime"
+        },
+        {
+          "name": "promisedAmount",
+          "type": "BigInt"
+        },
+        {
+          "name": "status",
+          "type": "PromiseStatus"
+        },
+        {
+          "name": "notes",
+          "type": "String"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime"
+        }
+      ]
+    },
+    {
+      "name": "InvoiceEvent",
+      "columns": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "invoiceId",
+          "type": "String"
+        },
+        {
+          "name": "type",
+          "type": "InvoiceEventType"
+        },
+        {
+          "name": "metadata",
+          "type": "Json"
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime"
+        }
+      ]
+    }
+  ],
+  "numericScales": [
+    {
+      "model": "Invoice",
+      "field": "subtotal",
+      "scale": 2
+    },
+    {
+      "model": "Invoice",
+      "field": "tax",
+      "scale": 2
+    },
+    {
+      "model": "Invoice",
+      "field": "totalAmount",
+      "scale": 2
+    },
+    {
+      "model": "Invoice",
+      "field": "amountOutstanding",
+      "scale": 2
+    },
+    {
+      "model": "PaymentPromise",
+      "field": "promisedAmount",
+      "scale": 2
+    }
+  ]
+}
